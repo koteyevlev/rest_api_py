@@ -18,7 +18,8 @@ class Citizen(db.Model):
     birth_date = db.Column(db.DateTime)
     gender = db.Column(db.String(7))
     relatives = db.Column(db.PickleType())
-    import_id = db.Column(db.Integer, unique=True, primary_key=True)
+    import_id = db.Column(db.Integer)
+    intern_id = db.Column(db.Integer, unique=True, primary_key=True)
     created = db.Column(db.DateTime, default=datetime.now)
 
     def __init__(self, *args, **kwards):

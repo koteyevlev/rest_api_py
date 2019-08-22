@@ -16,7 +16,7 @@ def first_validate():
             "No json sent. Please sent some data to post")
         return None, errors
 
-    for field_name in ['citizen_id', 'town', 'street', 'building', 'apartment', 'name', 'birth_date', 'gender', 'relatives']:
+    for field_name in ['citizens']:
         if not type(json_s.get(field_name)):
             errors.append(
                 "Field '{}' is missing or is not a string".format(field_name))
@@ -45,33 +45,38 @@ def page_not_found(e):
 def post_data():
 #    return render_template('404.html'), 404 
     json_s, errors = first_validate()
+    lst_cit = json_s['citizens']
     #errors= last_valid(errors)
     if errors:
         print(errors[0])
         return errors[0], 400
         # return flask.Response(status=400), 400
-#    try:
-    if True == True:
+    try:
         db.create_all()
-        citizen_id = json_s['citizen_id']
-        town = json_s['town']
-        street = json_s['street']
-        building = json_s['building']
-        apartment = json_s['apartment']
-        name = json_s['name']
-        #birth_date = json_s['birth_date']
-        #match = re.search(r'\d{2}-\d{2}-\d{4}', json_s['birth_date'])
-        birth_date = datetime.datetime.strptime(json_s['birth_date'], '%d.%m.%Y').date()
-        gender = json_s['gender']
-        relatives = list(map(int, str(json_s['relatives'])[1:-1].split(',')))
-        # return "stupid citizens crash again"
-        citizen = Citizen(citizen_id=citizen_id, town=town, street=street, building=building,
-                          apartment=apartment, name=name, birth_date=birth_date, gender=gender,
-                          relatives=relatives)
-        # return "Base crush"
-        db.session.add(citizen)
+        try:
+            import_id = Citizen.query.last().import_id + 1
+        except:
+            import_id = 1
+        for cit in lst_cit:
+            citizen_id = cit['citizen_id']
+            town = cit['town']
+            street = cit['street']
+            building = cit['building']
+            apartment = cit['apartment']
+            name = cit['name']
+            #birth_date = json_s['birth_date']
+            #match = re.search(r'\d{2}-\d{2}-\d{4}', json_s['birth_date'])
+            birth_date = datetime.datetime.strptime(cit['birth_date'], '%d.%m.%Y').date()
+            gender = cit['gender']
+            relatives = list(map(int, str(cit['relatives'])[1:-1].split(',')))
+            # return "stupid citizens crash again"
+            citizen = Citizen(citizen_id=citizen_id, town=town, street=street, building=building,
+                              apartment=apartment, name=name, birth_date=birth_date, gender=gender,
+                              relatives=relatives, import_id=import_id)
+            # return "Base crush"
+            db.session.add(citizen)
         db.session.commit()
         #return "something"
-        return jsonify( {"data": citizen.import_id}), 201
-    #except:
-     #   return 'Something wrong', 400
+        return jsonify( {"data": {"import_id": citizen.import_id}}), 201
+    except:
+        return 'Something wrong', 400
