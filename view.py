@@ -13,7 +13,7 @@ def first_validate():
             "No json sent. Please sent some data to post")
         return None, errors
 
-    for field_name in ['title', 'url']:
+    for field_name in ['title']:
         if type(json_s.get(field_name)) is not str:
             errors.append(
                 "Field '{}' is missing or is not a string".format(field_name))
@@ -23,6 +23,7 @@ def first_validate():
 
 @app.route('/')
 def index():
+#    return 'Go more'
     return render_template('index.html')
 
 
@@ -36,11 +37,13 @@ def page_not_found(e):
     return render_template('400.html'), 400
 
 
-@app.route('/imports', method=["POST"])
+@app.route('/imports', methods=["POST"])
 def post_data():
+#    return render_template('404.html'), 404 
     json_s, errors = first_validate()
     #errors= last_valid(errors)
     if errors:
+        return errors[0]
         return flask.Response(status=400), 400
     db.create_all()
-    return json
+    return "jsontitle"
