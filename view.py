@@ -15,7 +15,6 @@ def first_validate():
         errors.append(
             "No json sent. Please sent some data to post")
         return None, errors
-
     for field_name in ['citizens']:
         if not type(json_s.get(field_name)):
             errors.append(
@@ -43,7 +42,7 @@ def page_not_found(e):
 
 @app.route('/imports', methods=["POST"])
 def post_data():
-#    return render_template('404.html'), 404 
+#    return render_template('404.html'), 404
     json_s, errors = first_validate()
     lst_cit = json_s['citizens']
     #errors= last_valid(errors)
@@ -54,7 +53,7 @@ def post_data():
     try:
         db.create_all()
         try:
-            import_id = Citizen.query.last().import_id + 1
+            import_id = (Citizen.query.all()[-1]).import_id + 1
         except:
             import_id = 1
         for cit in lst_cit:
@@ -79,4 +78,4 @@ def post_data():
         #return "something"
         return jsonify( {"data": {"import_id": citizen.import_id}}), 201
     except:
-        return 'Something wrong', 400
+        return render_template('400.html'), 400
