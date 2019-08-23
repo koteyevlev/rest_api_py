@@ -95,6 +95,21 @@ def get_citizens(import_id):
         return render_template('400.html'), 400
 
 
+def print_citizen(self):
+    citizen = {}
+    citizen["citizen_id"] = self.citizen_id
+    citizen["town"] = self.town
+    citizen["street"] = self.street
+    citizen["building"] = self.building
+    citizen["apartment"] = self.apartment
+    citizen["name"] = self.name
+    citizen["birth_date"] = self.birth_date
+    citizen["gender"] = self.gender
+    citizen["relatives"]= self.relatives
+    return (citizen)
+    
+
+
 @app.route('/imports/<import_id>/citizens/<citizen_id>', methods=["PATCH"])
 def edit_data(import_id, citizen_id):
     try:
@@ -110,30 +125,31 @@ def edit_data(import_id, citizen_id):
         citizen_id, town, street, building, apartment, name, birth_date, gender, relatives, import_id = old_citizen.citizen_id, old_citizen.town, old_citizen.street, old_citizen.building, old_citizen.apartment, old_citizen.name, old_citizen.birth_date, old_citizen.gender, old_citizen.relatives, old_citizen.import_id
         cit = json_s
         if cit['town']:
-            town = cit['town']
+            old_citizen.town = cit['town']
         if cit['street']:
-            street = cit['street']
+            old_citizen.street = cit['street']
         if cit['building']:
-            building = cit['building']
+            old_citizen.building = cit['building']
         if cit['apartment']:
-            apartment = cit['apartment']
+            old_citizen.apartment = cit['apartment']
         if cit['name']:
-            name = cit['name']
+            old_citizen.name = cit['name']
             #birth_date = json_s['birth_date']
             #match = re.search(r'\d{2}-\d{2}-\d{4}', json_s['birth_date'])
         if cit['birth_date']:
-            birth_date = datetime.datetime.strptime(cit['birth_date'], '%d.%m.%Y').date()
-        if datetime.datetime.now().date() < birth_date:
+            old_citizen.birth_date = datetime.datetime.strptime(cit['birth_date'], '%d.%m.%Y').date()
+        if datetime.datetime.now().date() < old_citizen.birth_date:
             return render_template('400.html'), 400
         if cit['gender']:
-            gender = cit['gender']
+            old_citizen.gender = cit['gender']
         if cit['relatives']:
-            relatives = list(map(int, str(cit['relatives'])[1:-1].split(',')))
+            old_citizen.relatives = list(map(int, str(cit['relatives'])[1:-1].split(',')))
 			# delete old relatives
-        new_citizen = Citizen(citizen_id=citizen_id, town=town, street=street, building=building,
-                          apartment=apartment, name=name, birth_date=birth_date, gender=gender,
-                          relatives=relatives, import_id=import_id)
+        #new_citizen = Citizen(citizen_id=citizen_id, town=town, street=street, building=building,
+         #                 apartment=apartment, name=name, birth_date=birth_date, gender=gender,
+          #                relatives=relatives, import_id=import_id)
         db.session.commit()
-        return jsonify({"data": str(new_citizen)})
+        printer = print_citizen(old_citizen)
+        return jsonify({"data": printer}) # порядок неверный
     except:
         return render_template('400.html'), 400

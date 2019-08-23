@@ -26,16 +26,16 @@ class Citizen(db.Model):
         super(Citizen, self).__init__(*args, **kwards)
 
     def __repr__(self):
-		citizen = dict()
-		citizen["citizen_id"] = self.citizen_id
-		citizen["town"] = self.town
-		citizen["street"] = self.street
-		citizen["building"] = self.building
-		citizen["apartment"] = self.apartment
-		citizen["name"] = self.name
-		citizen["birth_date"] = self.birth_date
-		citizen["gender"] = self.gender
-		citizen["relatives"]= self.relatives
+        citizen = dict()
+        citizen["citizen_id"] = self.citizen_id
+        citizen["town"] = self.town
+        citizen["street"] = self.street
+        citizen["building"] = self.building
+        citizen["apartment"] = self.apartment
+        citizen["name"] = self.name
+        citizen["birth_date"] = self.birth_date.strftime('%d.%m.%Y')
+        citizen["gender"] = self.gender
+        citizen["relatives"]= self.relatives
         return str(citizen)
 
 
