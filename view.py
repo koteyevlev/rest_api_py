@@ -40,22 +40,32 @@ def page_not_found(e):
     return render_template('400.html'), 400
 
 
+def last_valid(errors, lst_cit, import_id):
+	try:
+		for cit in lst_cit:
+			relatives_check = list(map(int, str(cit['relatives'])[1:-1].split(',')))
+			for one in relatives_check:
+				old_citizen = Citizen.query.filter(Citizen.import_id == import_id and Citizen.citizen_id == one).first_or_404()
+				if cit['citizen_id'] not in old_citizen.relatives:
+					return render_template('400.html'), 400
+
+
 @app.route('/imports', methods=["POST"])
 def post_data():
 #    return render_template('404.html'), 404
     json_s, errors = first_validate()
     lst_cit = json_s['citizens']
-    #errors= last_valid(errors) #check relatives
+	try:
+        import_id = (Citizen.query.all()[-1]).import_id + 1
+    except:
+        import_id = 1
+    #check relatives
     if errors:
         print(errors[0])
         return render_template('400.html'), 400
         # return flask.Response(status=400), 400
     try:
         db.create_all()
-        try:
-            import_id = (Citizen.query.all()[-1]).import_id + 1
-        except:
-            import_id = 1
         for cit in lst_cit:
             citizen_id = cit['citizen_id']
             town = cit['town']
@@ -76,6 +86,7 @@ def post_data():
                               relatives=relatives, import_id=import_id)
             # return "Base crush"
             db.session.add(citizen)
+		last_valid(errors, lst_cit, import_id)
         db.session.commit()
         #return "something"
         return jsonify( {"data": {"import_id": citizen.import_id}}), 201
@@ -107,7 +118,22 @@ def print_citizen(self):
     citizen["gender"] = self.gender
     citizen["relatives"]= self.relatives
     return (citizen)
-    
+
+
+def change_relative(old_data, new_data, import_id):
+    delete_list = list(set(old_data) - set(new_data))
+    add_list = list(set(new_data) - set(old_data))
+	try:
+        for one in delete_list:
+	        old_citizen = Citizen.query.filter(Citizen.import_id == import_id and Citizen.citizen_id == one).first_or_404()
+			old_citizen.relatives.remove(one)
+			db.session.commit()
+		for one in add_list:
+	        old_citizen = Citizen.query.filter(Citizen.import_id == import_id and Citizen.citizen_id == one).first_or_404()
+			old_citizen.relatives.add(one)
+			db.session.commit()
+	except:
+		return render_template('400.html'), 400
 
 
 @app.route('/imports/<import_id>/citizens/<citizen_id>', methods=["PATCH"])
@@ -143,11 +169,9 @@ def edit_data(import_id, citizen_id):
         if cit['gender']:
             old_citizen.gender = cit['gender']
         if cit['relatives']:
+			change_relative(old_citizen.relatives, list(map(int, str(cit['relatives'])[1:-1].split(','))), import_id)
             old_citizen.relatives = list(map(int, str(cit['relatives'])[1:-1].split(',')))
 			# delete old relatives
-        #new_citizen = Citizen(citizen_id=citizen_id, town=town, street=street, building=building,
-         #                 apartment=apartment, name=name, birth_date=birth_date, gender=gender,
-          #                relatives=relatives, import_id=import_id)
         db.session.commit()
         printer = print_citizen(old_citizen)
         return jsonify({"data": printer}) # порядок неверный
