@@ -1,0 +1,1 @@
+curl -X GET 'http://0.0.0.0:8080/imports/17s/towns/stat/percentile/age'

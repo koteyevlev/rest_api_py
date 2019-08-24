@@ -1,0 +1,1 @@
+curl -X PATCH 'http://0.0.0.0:8080/imports/17/citizens'

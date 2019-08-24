@@ -26,7 +26,6 @@ def first_validate():
 
 @app.route('/')
 def index():
-#    return 'Go more'
     return render_template('index.html')
 
 
@@ -40,15 +39,35 @@ def page_not_found(e):
     return render_template('400.html'), 400
 
 
+def argv_valid(cit, relatives_check, unique_cit_id):
+    if not list(set(relatives_check)) == relatives_check:
+        return 1
+    if cit["citizen_id"] in unique_cit_id or int(cit['citizen_id']) < 0:
+        return 1
+    if len(cit['town']) > 256 or cit["town"] == "" or not re.search('[a-zA-Z0-9]', cit['town']):
+        return 1
+    if len(cit['street']) > 256 or cit["street"] == "" or not re.search('[a-zA-Z0-9]', cit['street']):
+        return 1
+    if len(cit['building']) > 256 or cit["building"] == "" or not re.search('[a-zA-Z0-9]', cit['building']):
+        return 1
+    if len(cit['name']) > 256 or cit["name"] == "":
+        return 1
+    if not cit['gender'] == 'male' and not cit['gender'] == 'female':
+        return 1
+    if int(cit['apartment']) < 0:
+        return 1
+
 
 def last_valid(errors, lst_cit, import_id):
     try:
+        unique_cit_id = {}
         for cit in lst_cit:
             relatives_check = list(map(int, str(cit['relatives'])[1:-1].split(',')))
             if not relatives_check:
                 return None
-            if not list(set(relatives_check)) == relatives_check:
+            if argv_valid(cit, relatives_check, unique_cit_id):
                 return 1
+            unique_cit_id.add(cit['citizen_id'])
             for one in relatives_check:
                 old_citizen = Citizen.query.filter(Citizen.import_id == import_id).filter(Citizen.citizen_id == one).first_or_404()
                 #print(old_citizen.name, one)
@@ -58,6 +77,19 @@ def last_valid(errors, lst_cit, import_id):
     except:
         return 1
 
+
+def print_citizen(self):
+    citizen = dict()
+    citizen["citizen_id"] = self.citizen_id
+    citizen["town"] = self.town
+    citizen["street"] = self.street
+    citizen["building"] = self.building
+    citizen["apartment"] = self.apartment
+    citizen["name"] = self.name
+    citizen["birth_date"] = self.birth_date
+    citizen["gender"] = self.gender
+    citizen["relatives"] = self.relatives
+    return citizen
 
 
 @app.route('/imports', methods=["POST"])
@@ -71,8 +103,7 @@ def post_data():
         import_id = 1
     #check relatives
     if errors:
-        return render_template('400.html'), 400
-        # return flask.Response(status=400), 400
+        return errors, 400
     try:
         db.create_all()
         for cit in lst_cit:
@@ -99,7 +130,7 @@ def post_data():
             # return "Base crush"
             db.session.add(citizen)
         if last_valid(errors, lst_cit, import_id):
-            return render_template('400.html'), 402
+            return render_template('400.html'), 400
         #return render_template('400.html'), 403
         db.session.commit()
         #return "something"
@@ -167,20 +198,6 @@ def get_stat(import_id):
     return {"data": output}
 
 
-def print_citizen(self):
-    citizen = dict()
-    citizen["citizen_id"] = self.citizen_id
-    citizen["town"] = self.town
-    citizen["street"] = self.street
-    citizen["building"] = self.building
-    citizen["apartment"] = self.apartment
-    citizen["name"] = self.name
-    citizen["birth_date"] = self.birth_date
-    citizen["gender"] = self.gender
-    citizen["relatives"] = self.relatives
-    return citizen
-
-
 def change_relative(old_data, new_data, import_id):
     try:
         delete_list = list(set(old_data) - set(new_data))
@@ -213,7 +230,6 @@ def edit_data(import_id, citizen_id):
         if json_s is None:
             return render_template('400.html'), 400
         editors = json_s.keys()
-        #return str(editors)
         for line in editors:
             if line not in ['town', 'street', 'building', 'apartment', 'name', 'birth_date', 'gender', 'relatives']:
                 return render_template('400.html'), 400
@@ -229,8 +245,6 @@ def edit_data(import_id, citizen_id):
             old_citizen.apartment = cit['apartment']
         if not cit['name'] is None:
             old_citizen.name = cit['name']
-            #birth_date = json_s['birth_date']
-            #match = re.search(r'\d{2}-\d{2}-\d{4}', json_s['birth_date'])
         if not cit['birth_date'] is None:
             old_citizen.birth_date = datetime.datetime.strptime(cit['birth_date'], '%d.%m.%Y').date()
         if datetime.datetime.now().date() < old_citizen.birth_date:
@@ -242,11 +256,10 @@ def edit_data(import_id, citizen_id):
                 new_data = list(map(int, str(cit['relatives'])[1:-1].split(',')))
             except:
                 new_data = []
-            if change_relative(old_citizen.relatives, new_data, import_id):
-                return "ERROR"
+            if change_relative(old_citizen.relatives, new_data, import_id) or \
+                    argv_valid({"town": town, "street": street, "building": building, "apartment": apartment, "name": name, "gender": gender, "citizen_id": citizen_id}, old_citizen.relative, {}):
+                return "Problem with arguments", 400
             old_citizen.relatives = new_data
-        # print(old_citizen.relatives, cit['relatives'])
-		# delete old relatives
         db.session.commit()
         printer = print_citizen(old_citizen)
         return ({"data": printer}) # порядок неверный
