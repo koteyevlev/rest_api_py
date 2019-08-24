@@ -1,1 +1,1 @@
-curl -d '{"town": "Моsdfсква", "street": "Льва Толстого", "building": "16к7стр5", "apartment": 7, "name": "Первый чел", "birth_date": "01.11.1998", "gender": "male", "relatives": []}' -H "Content-Type: application/json"  -X PATCH 'http://127.0.0.1:5000/imports/17/citizens/1'
+curl -d '{"town": "Моsdfсква", "street": "Льва Толстого", "building": "16к7стр5", "apartment": 7, "name": "first Первый чел", "birth_date": "01.11.1998", "gender": "male", "relatives": []}' -H "Content-Type: application/json"  -X PATCH 'http://127.0.0.1:5000/imports/17/citizens/1'

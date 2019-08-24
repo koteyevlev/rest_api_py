@@ -144,25 +144,19 @@ def change_relative(old_data, new_data, import_id):
         if delete_list:
             for one in delete_list:
                 old_citizen = Citizen.query.filter(Citizen.import_id == import_id).filter(Citizen.citizen_id == int(one)).first_or_404()
-                print("im strong")
-                tmp = old_citizen.relatives
-                print(tmp, one)
+                tmp = list(old_citizen.relatives)
                 tmp.remove(int(one))
-                print(tmp)
                 old_citizen.relatives = tmp
-                print("ss", old_citizen.relatives, old_citizen.name, old_citizen.citizen_id)
+                if old_citizen.citizen_id == 2:
+                    old_citizen.street = " Let s go"
                 db.session.add(old_citizen)
-                db.session.commit()
         if add_list:
             for one in add_list:
                 old_citizen = Citizen.query.filter(Citizen.import_id == import_id).filter(Citizen.citizen_id == int(one)).first_or_404()
-                tmp = old_citizen.relatives
+                tmp = list(old_citizen.relatives)
                 if int(one) not in tmp:
                     tmp.append(int(one))
                 old_citizen.relatives = tmp
-                print("d")
-                print(tmp, old_citizen.name)
-                db.session.commit()
     except:
         return render_template('400.html'), 402
 
