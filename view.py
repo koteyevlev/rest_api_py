@@ -45,11 +45,32 @@ def argv_valid(cit, relatives_check, unique_cit_id):
     if cit["citizen_id"] in unique_cit_id or int(cit['citizen_id']) < 0:
         return 1
     if len(cit['town']) > 256 or cit["town"] == "" or not re.search('[a-zA-Z0-9]', cit['town']):
-        return 1
+        if not 0 > len(cit['town']) > 256:
+            try:
+                cit['town'].encode('ascii')
+                return 1
+            except:
+                pass
+        else:
+            return 1
     if len(cit['street']) > 256 or cit["street"] == "" or not re.search('[a-zA-Z0-9]', cit['street']):
-        return 1
+        if not 0 > len(cit['street']) > 256:
+            try:
+                cit['street'].encode('ascii')
+                return 1
+            except:
+                pass
+        else:
+            return 1
     if len(cit['building']) > 256 or cit["building"] == "" or not re.search('[a-zA-Z0-9]', cit['building']):
-        return 1
+        if not 0 > len(cit['building']) > 256:
+            try:
+                cit['building'].encode('ascii')
+                return 1
+            except:
+                pass
+        else:
+            return 1
     if len(cit['name']) > 256 or cit["name"] == "":
         return 1
     if not cit['gender'] == 'male' and not cit['gender'] == 'female':
@@ -60,14 +81,14 @@ def argv_valid(cit, relatives_check, unique_cit_id):
 
 def last_valid(errors, lst_cit, import_id):
     try:
-        unique_cit_id = {}
+        unique_cit_id = list()
         for cit in lst_cit:
             relatives_check = list(map(int, str(cit['relatives'])[1:-1].split(',')))
-            if not relatives_check:
-                return None
             if argv_valid(cit, relatives_check, unique_cit_id):
                 return 1
-            unique_cit_id.add(cit['citizen_id'])
+            unique_cit_id.append(cit['citizen_id'])
+            if not relatives_check:
+                continue
             for one in relatives_check:
                 old_citizen = Citizen.query.filter(Citizen.import_id == import_id).filter(Citizen.citizen_id == one).first_or_404()
                 #print(old_citizen.name, one)
@@ -107,6 +128,10 @@ def post_data():
     try:
         db.create_all()
         for cit in lst_cit:
+            editors = list(cit)
+            for line in editors:
+                if line not in ['citizen_id', 'town', 'street', 'building', 'apartment', 'name', 'birth_date', 'gender', 'relatives']:
+                    return "Invalid keys in citizen", 404
             citizen_id = cit['citizen_id']
             town = cit['town']
             street = cit['street']
@@ -130,7 +155,7 @@ def post_data():
             # return "Base crush"
             db.session.add(citizen)
         if last_valid(errors, lst_cit, import_id):
-            return render_template('400.html'), 400
+            return render_template('400.html'), 403
         #return render_template('400.html'), 403
         db.session.commit()
         #return "something"
@@ -147,7 +172,7 @@ def get_citizens(import_id):
         for citizen in data:
             output["data"].append(citizen)
         if not output["data"]:
-            return render_template('400.html'), 400
+            return "No such import id, check your URL", 404
         return str(output), 200 # dont forget to create dict
     except:
         return render_template('400.html'), 400
@@ -157,7 +182,11 @@ def get_citizens(import_id):
 def get_birthdays(import_id):
     output = dict()
     month = 1
+    if not isinstance(import_id, int):
+        return "Invalid import id", 404
     data = Citizen.query.filter(Citizen.import_id == int(import_id))
+    if not data:
+       return "Invalid import id", 404
     while month < 13:
         people = []
         output[str(month)] = []
@@ -180,6 +209,8 @@ def get_birthdays(import_id):
 @app.route('/imports/<import_id>/towns/stat/percentile/age')
 def get_stat(import_id):
     output = []
+    if not isinstance(import_id, int):
+        return "Invalid import id", 404
     data = Citizen.query.filter(Citizen.import_id == int(import_id))
     towns = set()
     for one in data:
@@ -225,6 +256,7 @@ def change_relative(old_data, new_data, import_id):
 @app.route('/imports/<import_id>/citizens/<citizen_id>', methods=["PATCH"])
 def edit_data(import_id, citizen_id):
     try:
+     if True == True:
         old_citizen = Citizen.query.filter(Citizen.import_id == import_id).filter(Citizen.citizen_id == citizen_id).first_or_404()
         json_s = flask.request.get_json()
         if json_s is None:
@@ -256,8 +288,8 @@ def edit_data(import_id, citizen_id):
                 new_data = list(map(int, str(cit['relatives'])[1:-1].split(',')))
             except:
                 new_data = []
-            if change_relative(old_citizen.relatives, new_data, import_id) or \
-                    argv_valid({"town": town, "street": street, "building": building, "apartment": apartment, "name": name, "gender": gender, "citizen_id": citizen_id}, old_citizen.relative, {}):
+            to_check = {"town": town, "street": street, "building": building, "apartment": apartment, "name": name, "gender": gender, "citizen_id": citizen_id}
+            if change_relative(old_citizen.relatives, new_data, import_id) or argv_valid(to_check, old_citizen.relatives, set()):
                 return "Problem with arguments", 400
             old_citizen.relatives = new_data
         db.session.commit()
