@@ -6,6 +6,7 @@ import re
 import datetime
 from models import Citizen
 from app import db
+import numpy as np
 
 
 def first_validate():
@@ -19,7 +20,6 @@ def first_validate():
         if not type(json_s.get(field_name)):
             errors.append(
                 "Field '{}' is missing or is not a string".format(field_name))
-            print("I found this", field_name)
 
     return json_s, errors
 
@@ -122,8 +122,49 @@ def get_citizens(import_id):
         return render_template('400.html'), 400
 
 
+@app.route('/imports/<import_id>/citizens/birthdays')
+def get_birthdays(import_id):
+    output = dict()
+    month = 1
+    data = Citizen.query.filter(Citizen.import_id == int(import_id))
+    while month < 13:
+        people = []
+        output[str(month)] = []
+        for citizen in data:
+            if int(citizen.birth_date.strftime("%m")) == month:
+                for i in citizen.relatives:
+                    if i not in people:
+                        output[str(month)].append({"citizen_id": i, "presents": 1})
+                    else:
+                        for part in output[str(month)]:
+                            if part["citizen_id"] == i:
+                                part["presents"] += 1
+                                break
+                    people.append(i)
+        # do something
+    return {"data": output}
+
+
+@app.route('/imports/<import_id>/towns/stat/percentile/age')
+def get_stat(import_id):
+    output = []
+    towns = Citizen.query.filter(Citizen.import_id == int(import_id)).options(load_only("town"))
+    for town in towns:
+        elem = dict()
+        elem["town"] = town
+        birth_dates = list(Citizen.query.filter(Citizen.import_id == int(import_id), Citizen.town == town).options(load_only("birth_date")))
+        tmp_ages = []
+        for i in birth_dates:
+            tmp_ages.append((datetime.datetime.now().date() - i).year)
+        elem["p50"] = np.percentile(tmp_ages, 50, axis=2, interpolation='linear')
+        elem["p75"] = np.percentile(tmp_ages, 75, axis=2, interpolation='linear')
+        elem["p99"] = np.percentile(tmp_ages, 99, axis=2, interpolation='linear')
+        output.append(elem)
+    return {"data": output}
+
+
 def print_citizen(self):
-    citizen = {}
+    citizen = dict()
     citizen["citizen_id"] = self.citizen_id
     citizen["town"] = self.town
     citizen["street"] = self.street
@@ -132,15 +173,14 @@ def print_citizen(self):
     citizen["name"] = self.name
     citizen["birth_date"] = self.birth_date
     citizen["gender"] = self.gender
-    citizen["relatives"]= self.relatives
-    return (citizen)
+    citizen["relatives"] = self.relatives
+    return citizen
 
 
 def change_relative(old_data, new_data, import_id):
     try:
         delete_list = list(set(old_data) - set(new_data))
         add_list = list(set(new_data) - set(old_data))
-        print("del_list -", delete_list, "add_list", add_list)
         if delete_list:
             for one in delete_list:
                 old_citizen = Citizen.query.filter(Citizen.import_id == import_id).filter(Citizen.citizen_id == int(one)).first_or_404()
@@ -158,7 +198,7 @@ def change_relative(old_data, new_data, import_id):
                     tmp.append(int(one))
                 old_citizen.relatives = tmp
     except:
-        return render_template('400.html'), 402
+        return render_template('400.html'), 400
 
 
 @app.route('/imports/<import_id>/citizens/<citizen_id>', methods=["PATCH"])
@@ -175,25 +215,25 @@ def edit_data(import_id, citizen_id):
                 return render_template('400.html'), 400
         citizen_id, town, street, building, apartment, name, birth_date, gender, relatives, import_id = old_citizen.citizen_id, old_citizen.town, old_citizen.street, old_citizen.building, old_citizen.apartment, old_citizen.name, old_citizen.birth_date, old_citizen.gender, old_citizen.relatives, old_citizen.import_id
         cit = json_s
-        if not cit['town'] == None:
+        if not cit['town'] is None:
             old_citizen.town = cit['town']
-        if not cit['street']== None:
+        if not cit['street'] is None:
             old_citizen.street = cit['street']
-        if not cit['building'] == None:
+        if not cit['building'] is None:
             old_citizen.building = cit['building']
-        if not cit['apartment'] == None:
+        if not cit['apartment'] is None:
             old_citizen.apartment = cit['apartment']
-        if not cit['name'] == None:
+        if not cit['name'] is None:
             old_citizen.name = cit['name']
             #birth_date = json_s['birth_date']
             #match = re.search(r'\d{2}-\d{2}-\d{4}', json_s['birth_date'])
-        if not cit['birth_date'] == None:
+        if not cit['birth_date'] is None:
             old_citizen.birth_date = datetime.datetime.strptime(cit['birth_date'], '%d.%m.%Y').date()
         if datetime.datetime.now().date() < old_citizen.birth_date:
             return render_template('400.html'), 400
-        if not cit['gender'] == None:
+        if not cit['gender'] is None:
             old_citizen.gender = cit['gender'] # check gender
-        if not cit['relatives'] == None:
+        if not cit['relatives'] is None:
             try:
                 new_data = list(map(int, str(cit['relatives'])[1:-1].split(',')))
             except:
@@ -201,8 +241,8 @@ def edit_data(import_id, citizen_id):
             if change_relative(old_citizen.relatives, new_data, import_id):
                 return "ERROR"
             old_citizen.relatives = new_data
-        #print(old_citizen.relatives, cit['relatives'])
-			# delete old relatives
+        # print(old_citizen.relatives, cit['relatives'])
+		# delete old relatives
         db.session.commit()
         printer = print_citizen(old_citizen)
         return ({"data": printer}) # порядок неверный
