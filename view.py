@@ -141,6 +141,7 @@ def get_birthdays(import_id):
                                 part["presents"] += 1
                                 break
                     people.append(i)
+        month += 1
         # do something
     return {"data": output}
 
@@ -148,17 +149,20 @@ def get_birthdays(import_id):
 @app.route('/imports/<import_id>/towns/stat/percentile/age')
 def get_stat(import_id):
     output = []
-    towns = Citizen.query.filter(Citizen.import_id == int(import_id)).options(load_only("town"))
+    data = Citizen.query.filter(Citizen.import_id == int(import_id))
+    towns = set()
+    for one in data:
+        towns.add(one.town)
     for town in towns:
         elem = dict()
         elem["town"] = town
-        birth_dates = list(Citizen.query.filter(Citizen.import_id == int(import_id), Citizen.town == town).options(load_only("birth_date")))
-        tmp_ages = []
-        for i in birth_dates:
-            tmp_ages.append((datetime.datetime.now().date() - i).year)
-        elem["p50"] = np.percentile(tmp_ages, 50, axis=2, interpolation='linear')
-        elem["p75"] = np.percentile(tmp_ages, 75, axis=2, interpolation='linear')
-        elem["p99"] = np.percentile(tmp_ages, 99, axis=2, interpolation='linear')
+        birth_date_data = list(Citizen.query.filter(Citizen.import_id == int(import_id)).filter(Citizen.town == town))
+        tmp_ages = list()
+        for i in birth_date_data:
+            tmp_ages.append(((datetime.datetime.now() - i.birth_date).days / 365))
+        elem["p50"] = np.round(np.percentile(tmp_ages, 50, interpolation='linear'), 2)
+        elem["p75"] = np.round(np.percentile(tmp_ages, 75, interpolation='linear'), 2)
+        elem["p99"] = np.round(np.percentile(tmp_ages, 99, interpolation='linear'), 2)
         output.append(elem)
     return {"data": output}
 
