@@ -3,7 +3,7 @@
 Для запуска проекта нужно выполнить следующие шаги:
   1) Склонировать проект и зайти в папку проекта
   2) Если сервер уже запущен то выполнить команду - 'killall python' 
-  или 'sudo kill -9 <process PID>' PID можно найти командой 'sudo netstat -ltup'
+  или 'sudo kill -9 "process PID>"' PID можно найти командой 'sudo netstat -ltup'
   3) Выполнить команду 'bash start_server.sh'
 
 
