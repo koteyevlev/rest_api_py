@@ -179,7 +179,7 @@ def get_citizens(import_id):
             output["data"].append(print_citizen(citizen))
         if not output["data"]:
             return "No such import id, check your URL", 404
-        return output, 200
+        return jsonify(output), 200
     except:
         return render_template('400.html'), 400
 
@@ -219,7 +219,7 @@ def get_birthdays(import_id):
                                 break
                     people.append(i)
         month += 1
-    return {"data": output}
+    return jsonify({"data": output})
 
 
 '''
@@ -252,7 +252,7 @@ def get_stat(import_id):
         elem["p75"] = np.round(np.percentile(tmp_ages, 75, interpolation='linear'), 2)
         elem["p99"] = np.round(np.percentile(tmp_ages, 99, interpolation='linear'), 2)
         output.append(elem)
-    return {"data": output}
+    return jsonify({"data": output})
 
 
 '''
@@ -300,6 +300,8 @@ def edit_data(import_id, citizen_id):
         if json_s is None:
             return render_template('400.html'), 400
         editors = json_s.keys()
+        if not editors:
+            return "Empty json", 400
         for line in editors:
             if line not in ['town', 'street', 'building', 'apartment', 'name', 'birth_date', 'gender', 'relatives']:
                 return "Some keys is invalid", 400
@@ -335,6 +337,6 @@ def edit_data(import_id, citizen_id):
             old_citizen.relatives = new_data
         db.session.commit()
         printer = print_citizen(old_citizen)
-        return {"data": printer} # порядок другой
+        return jsonify({"data": printer}) # порядок другой
     except:
         return render_template('400.html'), 400
