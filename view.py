@@ -115,7 +115,7 @@ def print_citizen(self):
     citizen["building"] = self.building
     citizen["apartment"] = self.apartment
     citizen["name"] = self.name
-    citizen["birth_date"] = self.birth_date
+    citizen["birth_date"] = datetime.datetime.strftime(self.birth_date, "%d.%m.%Y")
     citizen["gender"] = self.gender
     citizen["relatives"] = self.relatives
     return citizen
@@ -176,10 +176,10 @@ def get_citizens(import_id):
         data = Citizen.query.filter(Citizen.import_id == int(import_id))
         output = {"data": []}
         for citizen in data:
-            output["data"].append(print_citizen(citizen))
+            output["data"].append(citizen)
         if not output["data"]:
             return "No such import id, check your URL", 404
-        return jsonify(output), 200
+        return str(output), 200 ## если не делать перевод в строку то вместо русских букв пришлет юникод
     except:
         return render_template('400.html'), 400
 
@@ -238,9 +238,10 @@ def get_stat(import_id):
         data = Citizen.query.filter(Citizen.import_id == int(import_id))
     except:
         return "Invalid import id", 404
-    towns = set()
+    towns = list()
     for one in data:
-        towns.add(one.town)
+        towns.append(one.town)
+    towns = list(set(towns))
     for town in towns:
         elem = dict()
         elem["town"] = town
@@ -252,7 +253,7 @@ def get_stat(import_id):
         elem["p75"] = np.round(np.percentile(tmp_ages, 75, interpolation='linear'), 2)
         elem["p99"] = np.round(np.percentile(tmp_ages, 99, interpolation='linear'), 2)
         output.append(elem)
-    return jsonify({"data": output})
+    return ({"data": output}) # если не делать перевод в строку пришлет русские буквы в виде нечитаемого юникода
 
 
 '''
@@ -337,6 +338,6 @@ def edit_data(import_id, citizen_id):
             old_citizen.relatives = new_data
         db.session.commit()
         printer = print_citizen(old_citizen)
-        return jsonify({"data": printer})
+        return ({"data": printer})
     except:
         return render_template('400.html'), 400
