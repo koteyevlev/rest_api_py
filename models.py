@@ -3,11 +3,6 @@ from datetime import datetime
 import re
 
 
-def slugify(s):
-    pattern = r'[^\w+]'
-    return re.sub(pattern, '-', s)
-
-
 class Citizen(db.Model):
     citizen_id = db.Column(db.Integer)
     town = db.Column(db.String(257))

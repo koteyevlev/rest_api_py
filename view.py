@@ -8,17 +8,19 @@ from models import Citizen
 from app import db
 import numpy as np
 
+'''
+Первичная валидация проверяет был ли передан json и есть ли в нем нужныe ключи
+'''
 
 def first_validate():
     errors = []
-    print("fdd")
     json_s = flask.request.get_json()
     if json_s is None:
         errors.append(
             "No json sent. Please sent some data to post")
         return None, errors
     for field_name in ['citizens']:
-        if not type(json_s.get(field_name)):
+        if not type(json_s.get(field_name)): ## подозрительно
             errors.append(
                 "Field '{}' is missing or is not a string".format(field_name))
 
@@ -39,6 +41,9 @@ def page_not_found(e):
 def page_not_found(e):
     return render_template('400.html'), 400
 
+'''
+Валидация аргументов проверяет соответствие аргументов требованиям указаным в таблице задания
+'''
 
 def argv_valid(cit, relatives_check, unique_cit_id):
     if not len(set(relatives_check)) == len(relatives_check):
@@ -80,6 +85,10 @@ def argv_valid(cit, relatives_check, unique_cit_id):
         return 1
 
 
+'''
+До коммита все данные проверяются на уникальность citizen_id и на правильность родственных связей
+'''
+
 def last_valid(errors, lst_cit, import_id):
     try:
         unique_cit_id = list()
@@ -92,9 +101,7 @@ def last_valid(errors, lst_cit, import_id):
                 continue
             for one in relatives_check:
                 old_citizen = Citizen.query.filter(Citizen.import_id == import_id).filter(Citizen.citizen_id == one).first_or_404()
-                #print(old_citizen.name, one)
                 if int(cit['citizen_id']) not in list(old_citizen.relatives):
-                    #print(cit['citizen_id'], old_citizen.relatives, old_citizen.name)
                     return 1
     except:
         return 1
@@ -114,16 +121,20 @@ def print_citizen(self):
     return citizen
 
 
+'''
+При реализации первого задания как и в дальнейшем была использована библиотека SQLAlchemy для работы с базой данных
+Все данные сохраняются в таблицу только после валидации
+'''
+
+
 @app.route('/imports', methods=["POST"])
 def post_data():
-#    return render_template('404.html'), 404
     json_s, errors = first_validate()
     lst_cit = json_s['citizens']
     try:
         import_id = (Citizen.query.all()[-1]).import_id + 1
     except:
         import_id = 1
-    #check relatives
     if errors:
         return errors, 400
     try:
@@ -139,28 +150,22 @@ def post_data():
             building = cit['building']
             apartment = cit['apartment']
             name = cit['name']
-            #birth_date = json_s['birth_date']
-            #match = re.search(r'\d{2}-\d{2}-\d{4}', json_s['birth_date'])
             birth_date = datetime.datetime.strptime(cit['birth_date'], '%d.%m.%Y').date()
             if datetime.datetime.now().date() < birth_date:
                 return render_template('400.html'), 400
             gender = cit['gender']
             if len(str(cit['relatives'])) > 2:
-            	relatives = list(map(int, str(cit['relatives'])[1:-1].split(',')))
+                relatives = list(map(int, str(cit['relatives'])[1:-1].split(',')))
             else:
                 relatives = []
-            # return "stupid citizens crash again"
             citizen = Citizen(citizen_id=citizen_id, town=town, street=street, building=building,
                               apartment=apartment, name=name, birth_date=birth_date, gender=gender,
                               relatives=relatives, import_id=import_id)
-            # return "Base crush"
             db.session.add(citizen)
         if last_valid(errors, lst_cit, import_id):
-            return render_template('400.html'), 403
-        #return render_template('400.html'), 403
+            return render_template('400.html'), 403 # do not forget to do it 400
         db.session.commit()
-        #return "something"
-        return jsonify( {"data": {"import_id": citizen.import_id}}), 201
+        return jsonify({"data": {"import_id": citizen.import_id}}), 201
     except:
         return render_template('400.html'), 400
 
@@ -179,6 +184,16 @@ def get_citizens(import_id):
         return render_template('400.html'), 400
 
 
+'''
+Алгоритм поиска подарков состоит в следующем:
+1) Идет отдельная проверка каждого месяца
+2) Если гражданин родился в данном месяце то все родственники либо записываются в этот месяц 
+либо увеличивают число подарков на 1 в этом месяце
+3) Для проверки записан ли конкретный человек в данном месяце используется отдельный лист в котором хранятся id всех
+кто уже записан в таблице с подарками
+'''
+
+
 @app.route('/imports/<import_id>/citizens/birthdays')
 def get_birthdays(import_id):
     output = dict()
@@ -188,7 +203,7 @@ def get_birthdays(import_id):
     except:
         return "Invalid import id", 404
     if not data:
-       return "Invalid import id", 404
+        return "Invalid import id", 404
     while month < 13:
         people = []
         output[str(month)] = []
@@ -204,8 +219,16 @@ def get_birthdays(import_id):
                                 break
                     people.append(i)
         month += 1
-        # do something
     return {"data": output}
+
+
+'''
+Статистика по городам реализуется следующим образом:
+1) создается множество всех уникальных городов в конкретном import_id
+2) Для каждого элемента множество городов из базы данных выгружаются все горожане из данного города, с таким же import_id
+3) Создается новый лист в который записываются возраста каждого гражданина из выгрузки
+4) С помощью np.percentile и np.round из полученного листа высчитываются нужные перцентили
+'''
 
 
 @app.route('/imports/<import_id>/towns/stat/percentile/age')
@@ -232,6 +255,14 @@ def get_stat(import_id):
     return {"data": output}
 
 
+'''
+Данная функция реализует изменеие данных у родственников изменяемого гражданина если необходимо
+В частности - сначала создается список тех кому надо добавить и кому надо убрать данного гражданина,
+И соответственно по этим 2 спискам из базы данных находятся необходимые граждане,
+в них в дальнейшем либо удаляют либо добавляют изменяемого гражданина
+'''
+
+
 def change_relative(old_data, new_data, import_id):
     try:
         delete_list = list(set(old_data) - set(new_data))
@@ -242,8 +273,6 @@ def change_relative(old_data, new_data, import_id):
                 tmp = list(old_citizen.relatives)
                 tmp.remove(int(one))
                 old_citizen.relatives = tmp
-                if old_citizen.citizen_id == 2:
-                    old_citizen.street = " Let s go"
                 db.session.add(old_citizen)
         if add_list:
             for one in add_list:
@@ -256,10 +285,16 @@ def change_relative(old_data, new_data, import_id):
         return render_template('400.html'), 400
 
 
+'''
+Функция изменения данных очень похожа на функцию добавления
+Валидация данных аналогично с функцией POST
+Если хоть какой то параметр невалидный то никаких изменений не произойдет
+'''
+
+
 @app.route('/imports/<import_id>/citizens/<citizen_id>', methods=["PATCH"])
 def edit_data(import_id, citizen_id):
     try:
-     if True == True:
         old_citizen = Citizen.query.filter(Citizen.import_id == import_id).filter(Citizen.citizen_id == citizen_id).first_or_404()
         json_s = flask.request.get_json()
         if json_s is None:
@@ -267,7 +302,7 @@ def edit_data(import_id, citizen_id):
         editors = json_s.keys()
         for line in editors:
             if line not in ['town', 'street', 'building', 'apartment', 'name', 'birth_date', 'gender', 'relatives']:
-                return render_template('400.html'), 400
+                return "Some keys is invalid", 400
         citizen_id, town, street, building, apartment, name, birth_date, gender, relatives, import_id = old_citizen.citizen_id, old_citizen.town, old_citizen.street, old_citizen.building, old_citizen.apartment, old_citizen.name, old_citizen.birth_date, old_citizen.gender, old_citizen.relatives, old_citizen.import_id
         cit = json_s
         if not cit['town'] is None:
@@ -288,8 +323,8 @@ def edit_data(import_id, citizen_id):
             old_citizen.gender = cit['gender'] # check gender
         if not cit['relatives'] is None:
             try:
-                if cit['relatives'] == []:
-                    new_data =[]
+                if not cit['relatives']:
+                    new_data = []
                 else:
                     new_data = list(map(int, str(cit['relatives'])[1:-1].split(',')))
             except:
@@ -300,6 +335,6 @@ def edit_data(import_id, citizen_id):
             old_citizen.relatives = new_data
         db.session.commit()
         printer = print_citizen(old_citizen)
-        return ({"data": printer}) # порядок неверный
+        return {"data": printer} # порядок неверный
     except:
         return render_template('400.html'), 400
