@@ -18,11 +18,11 @@ def first_validate():
     json_s = flask.request.get_json()
     if json_s is None:
         errors.append(
-            "No json sent. Please sent some data to post")
+            "No json sent. Please sent some data to post\n")
         return None, errors
     editors = list(json_s)
     if not len(editors) == 1 or not editors[0] == 'citizens':
-        return "Invalid key in json", 400
+        return "Invalid key in json\n", 400
     return json_s, errors
 
 
@@ -33,12 +33,12 @@ def index():
 
 @app.errorhandler(404)
 def page_not_found(e):
-    return render_template('404.html'), 404
+    return "Invalid URL\n", 404
 
 
 @app.errorhandler(400)
 def page_not_found(e):
-    return render_template('400.html'), 400
+    return "Bad Request\n", 400
 
 '''
 Валидация аргументов проверяет соответствие аргументов требованиям указанным в таблице задания
@@ -143,7 +143,7 @@ def post_data():
             editors = list(cit)
             for line in editors:
                 if line not in ['citizen_id', 'town', 'street', 'building', 'apartment', 'name', 'birth_date', 'gender', 'relatives']:
-                    return "Invalid keys in citizen", 404
+                    return "Invalid keys in citizen\n", 404
             citizen_id = cit['citizen_id']
             town = cit['town']
             street = cit['street']
@@ -152,7 +152,7 @@ def post_data():
             name = cit['name']
             birth_date = datetime.datetime.strptime(cit['birth_date'], '%d.%m.%Y').date()
             if datetime.datetime.now().date() < birth_date:
-                return render_template('400.html'), 400
+                return "Date of some person is too large\n", 400
             gender = cit['gender']
             if len(str(cit['relatives'])) > 2:
                 relatives = list(map(int, str(cit['relatives'])[1:-1].split(',')))
@@ -163,12 +163,15 @@ def post_data():
                               relatives=relatives, import_id=import_id)
             db.session.add(citizen)
         if last_valid(lst_cit, import_id):
-            return render_template('400.html'), 400
+            return "Invalid arguments\n", 400
         db.session.commit()
         return jsonify({"data": {"import_id": citizen.import_id}}), 201
     except:
-        return render_template('400.html'), 400
+        return "Bad Request\n", 400
 
+'''
+При реализации метода Get предполагалось что при несуществующем import_id надо возвращать ошибку
+'''
 
 @app.route('/imports/<import_id>/citizens')
 def get_citizens(import_id):
@@ -177,11 +180,11 @@ def get_citizens(import_id):
         output = {"data": []}
         for citizen in data:
             output["data"].append(print_citizen(citizen))
-        if not output["data"]:
-            return "No such import id, check your URL", 404
-        return output, 200 ## если не делать перевод в строку то вместо русских букв пришлет юникод
+        if len(output["data"]) < 1:
+            return "No such import id, check your URL\n", 400
+        return output, 200 
     except:
-        return render_template('400.html'), 400
+        return "Bad Request\n", 400
 
 
 '''
@@ -201,9 +204,9 @@ def get_birthdays(import_id):
     try:
         data = Citizen.query.filter(Citizen.import_id == int(import_id))
     except:
-        return "Invalid import id", 404
+        return "Invalid import id\n", 404
     if not data:
-        return "Invalid import id", 404
+        return "Invalid import id\n", 404
     while month < 13:
         people = []
         output[str(month)] = []
@@ -236,8 +239,10 @@ def get_stat(import_id):
     output = []
     try:
         data = Citizen.query.filter(Citizen.import_id == int(import_id))
+        if list(data) == []:
+            return "No data from this import_id\n", 400
     except:
-        return "Invalid import id", 404
+        return "Invalid import id\n", 404
     towns = list()
     for one in data:
         towns.append(one.town)
@@ -253,7 +258,7 @@ def get_stat(import_id):
         elem["p75"] = np.round(np.percentile(tmp_ages, 75, interpolation='linear'), 2)
         elem["p99"] = np.round(np.percentile(tmp_ages, 99, interpolation='linear'), 2)
         output.append(elem)
-    return ({"data": output}) # если не делать перевод в строку пришлет русские буквы в виде нечитаемого юникода
+    return {"data": output} # если не делать перевод в строку пришлет русские буквы в виде нечитаемого юникода
 
 
 '''
@@ -264,26 +269,30 @@ def get_stat(import_id):
 '''
 
 
-def change_relative(old_data, new_data, import_id):
+def change_relative(old_data, new_data, import_id, citizen_id):
     try:
         delete_list = list(set(old_data) - set(new_data))
         add_list = list(set(new_data) - set(old_data))
         if delete_list:
             for one in delete_list:
+                if int(one) == citizen_id:
+                    continue
                 old_citizen = Citizen.query.filter(Citizen.import_id == import_id).filter(Citizen.citizen_id == int(one)).first_or_404()
                 tmp = list(old_citizen.relatives)
-                tmp.remove(int(one))
+                tmp.remove(citizen_id)
                 old_citizen.relatives = tmp
                 db.session.add(old_citizen)
         if add_list:
             for one in add_list:
+                if one == citizen_id:
+                    continue
                 old_citizen = Citizen.query.filter(Citizen.import_id == import_id).filter(Citizen.citizen_id == int(one)).first_or_404()
                 tmp = list(old_citizen.relatives)
-                if int(one) not in tmp:
-                    tmp.append(int(one))
+                if citizen_id not in tmp:
+                    tmp.append(citizen_id)
                 old_citizen.relatives = tmp
     except:
-        return render_template('400.html'), 400
+        return "Can't find some new relatives\n", 404
 
 
 '''
@@ -302,10 +311,10 @@ def edit_data(import_id, citizen_id):
             return render_template('400.html'), 400
         editors = json_s.keys()
         if not editors:
-            return "Empty json", 400
+            return "Empty json\n", 400
         for line in editors:
             if line not in ['town', 'street', 'building', 'apartment', 'name', 'birth_date', 'gender', 'relatives']:
-                return "Some keys is invalid", 400
+                return "Some keys is invalid\n", 400
         citizen_id, town, street, building, apartment, name, birth_date, gender, relatives, import_id = old_citizen.citizen_id, old_citizen.town, old_citizen.street, old_citizen.building, old_citizen.apartment, old_citizen.name, old_citizen.birth_date, old_citizen.gender, old_citizen.relatives, old_citizen.import_id
         cit = json_s
         if not cit['town'] is None:
@@ -321,7 +330,7 @@ def edit_data(import_id, citizen_id):
         if not cit['birth_date'] is None:
             old_citizen.birth_date = datetime.datetime.strptime(cit['birth_date'], '%d.%m.%Y').date()
         if datetime.datetime.now().date() < old_citizen.birth_date:
-            return render_template('400.html'), 400
+            return "Data has future date\n", 400
         if not cit['gender'] is None:
             old_citizen.gender = cit['gender']
         if not cit['relatives'] is None:
@@ -331,13 +340,13 @@ def edit_data(import_id, citizen_id):
                 else:
                     new_data = list(map(int, str(cit['relatives'])[1:-1].split(',')))
             except:
-                return "problem with relatives", 404
+                return "Problem with relatives\n", 404
             to_check = {"town": old_citizen.town, "street": old_citizen.street, "building": old_citizen.building, "apartment": old_citizen.apartment, "name": old_citizen.name, "gender": old_citizen.gender, "citizen_id": citizen_id}
-            if change_relative(old_citizen.relatives, new_data, import_id) or argv_valid(to_check, new_data, set()):
-                return "Problem with arguments", 404
+            if change_relative(old_citizen.relatives, new_data, import_id, citizen_id) or argv_valid(to_check, new_data, set()):
+                return "Problem with arguments\n", 404
             old_citizen.relatives = new_data
         db.session.commit()
         printer = print_citizen(old_citizen)
         return ({"data": printer})
     except:
-        return render_template('400.html'), 400
+        return "Bad Request\n", 400

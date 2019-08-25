@@ -15,7 +15,6 @@ class Citizen(db.Model):
     relatives = db.Column(db.PickleType())
     import_id = db.Column(db.Integer)
     intern_id = db.Column(db.Integer, unique=True, primary_key=True)
-    created = db.Column(db.DateTime, default=datetime.now)
 
     def __init__(self, *args, **kwards):
         super(Citizen, self).__init__(*args, **kwards)
