@@ -11,6 +11,7 @@ import numpy as np
 
 def first_validate():
     errors = []
+    print("fdd")
     json_s = flask.request.get_json()
     if json_s is None:
         errors.append(
@@ -40,7 +41,7 @@ def page_not_found(e):
 
 
 def argv_valid(cit, relatives_check, unique_cit_id):
-    if not list(set(relatives_check)) == relatives_check:
+    if not len(set(relatives_check)) == len(relatives_check):
         return 1
     if cit["citizen_id"] in unique_cit_id or int(cit['citizen_id']) < 0:
         return 1
@@ -182,9 +183,10 @@ def get_citizens(import_id):
 def get_birthdays(import_id):
     output = dict()
     month = 1
-    if not isinstance(import_id, int):
+    try:
+        data = Citizen.query.filter(Citizen.import_id == int(import_id))
+    except:
         return "Invalid import id", 404
-    data = Citizen.query.filter(Citizen.import_id == int(import_id))
     if not data:
        return "Invalid import id", 404
     while month < 13:
@@ -209,9 +211,10 @@ def get_birthdays(import_id):
 @app.route('/imports/<import_id>/towns/stat/percentile/age')
 def get_stat(import_id):
     output = []
-    if not isinstance(import_id, int):
+    try:
+        data = Citizen.query.filter(Citizen.import_id == int(import_id))
+    except:
         return "Invalid import id", 404
-    data = Citizen.query.filter(Citizen.import_id == int(import_id))
     towns = set()
     for one in data:
         towns.add(one.town)
@@ -285,12 +288,15 @@ def edit_data(import_id, citizen_id):
             old_citizen.gender = cit['gender'] # check gender
         if not cit['relatives'] is None:
             try:
-                new_data = list(map(int, str(cit['relatives'])[1:-1].split(',')))
+                if cit['relatives'] == []:
+                    new_data =[]
+                else:
+                    new_data = list(map(int, str(cit['relatives'])[1:-1].split(',')))
             except:
-                new_data = []
-            to_check = {"town": town, "street": street, "building": building, "apartment": apartment, "name": name, "gender": gender, "citizen_id": citizen_id}
-            if change_relative(old_citizen.relatives, new_data, import_id) or argv_valid(to_check, old_citizen.relatives, set()):
-                return "Problem with arguments", 400
+                return "problem with relatives", 404
+            to_check = {"town": old_citizen.town, "street": old_citizen.street, "building": old_citizen.building, "apartment": old_citizen.apartment, "name": old_citizen.name, "gender": old_citizen.gender, "citizen_id": citizen_id}
+            if change_relative(old_citizen.relatives, new_data, import_id) or argv_valid(to_check, new_data, set()):
+                return "Problem with arguments", 404
             old_citizen.relatives = new_data
         db.session.commit()
         printer = print_citizen(old_citizen)
