@@ -1,9 +1,10 @@
-## rest_api_py
-This is the implementation of the entrance project to the yandex backend development school
-If you want to launch this project, follow these steps:
-  1)Clone this project and go to project folder
-  2)Print this command "bash start_server.sh"
-  
+# Rest_api_py
+Здесь представлена реализация Rest API сервиса, в рамках отбора в школу бэкенд-разработки Яндекса.
+Для запуска проекта нужно выполнить следующие шаги:
+  1) Склонировать проект и зайти в папку проекта
+  2) Если сервер уже запущен то выполнить команду - 'killall python'
+  3) Выполнить команду 'bash start_server.sh'
+
 
 Сервер будет работать после перезагрузки Виртуальной машины - соответствующее правило прописано в crontab ("cat /etc/crontab")
 Тесты находятся в папке tests, невалидные тесты содержат в имени 'invalid' с описанием того что именно невалидно
@@ -17,7 +18,7 @@ Numpy - для реализации подсчета перцентилей;
 Для хранения данных была использована база данных Mysql
 
 
-# Файлы проекта
+## Файлы проекта
   1)view.py - Отвечает за всю валидацию и все комманды Rest API сервиса
   2)models.py - Хранит класс жителя
   3)config.py - конфигурация проекта
