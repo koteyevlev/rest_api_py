@@ -12,6 +12,7 @@ import numpy as np
 Первичная валидация проверяет был ли передан json и есть ли в нем нужныe ключи
 '''
 
+
 def first_validate():
     errors = []
     json_s = flask.request.get_json()
@@ -19,11 +20,9 @@ def first_validate():
         errors.append(
             "No json sent. Please sent some data to post")
         return None, errors
-    for field_name in ['citizens']:
-        if not type(json_s.get(field_name)): ## подозрительно
-            errors.append(
-                "Field '{}' is missing or is not a string".format(field_name))
-
+    editors = list(json_s)
+    if not len(editors) == 1 or not editors[0] == 'citizens':
+        return "Invalid key in json", 400
     return json_s, errors
 
 
@@ -44,6 +43,7 @@ def page_not_found(e):
 '''
 Валидация аргументов проверяет соответствие аргументов требованиям указаным в таблице задания
 '''
+
 
 def argv_valid(cit, relatives_check, unique_cit_id):
     if not len(set(relatives_check)) == len(relatives_check):
@@ -89,7 +89,7 @@ def argv_valid(cit, relatives_check, unique_cit_id):
 До коммита все данные проверяются на уникальность citizen_id и на правильность родственных связей
 '''
 
-def last_valid(errors, lst_cit, import_id):
+def last_valid(lst_cit, import_id):
     try:
         unique_cit_id = list()
         for cit in lst_cit:
@@ -162,7 +162,7 @@ def post_data():
                               apartment=apartment, name=name, birth_date=birth_date, gender=gender,
                               relatives=relatives, import_id=import_id)
             db.session.add(citizen)
-        if last_valid(errors, lst_cit, import_id):
+        if last_valid(lst_cit, import_id):
             return render_template('400.html'), 403 # do not forget to do it 400
         db.session.commit()
         return jsonify({"data": {"import_id": citizen.import_id}}), 201
@@ -176,10 +176,10 @@ def get_citizens(import_id):
         data = Citizen.query.filter(Citizen.import_id == int(import_id))
         output = {"data": []}
         for citizen in data:
-            output["data"].append(citizen)
+            output["data"].append(print_citizen(citizen))
         if not output["data"]:
             return "No such import id, check your URL", 404
-        return str(output), 200 # dont forget to create dict
+        return output, 200
     except:
         return render_template('400.html'), 400
 
@@ -335,6 +335,6 @@ def edit_data(import_id, citizen_id):
             old_citizen.relatives = new_data
         db.session.commit()
         printer = print_citizen(old_citizen)
-        return {"data": printer} # порядок неверный
+        return {"data": printer} # порядок другой
     except:
         return render_template('400.html'), 400
