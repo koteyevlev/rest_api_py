@@ -176,10 +176,10 @@ def get_citizens(import_id):
         data = Citizen.query.filter(Citizen.import_id == int(import_id))
         output = {"data": []}
         for citizen in data:
-            output["data"].append(citizen)
+            output["data"].append(print_citizen(citizen))
         if not output["data"]:
             return "No such import id, check your URL", 404
-        return str(output), 200 ## если не делать перевод в строку то вместо русских букв пришлет юникод
+        return output, 200 ## если не делать перевод в строку то вместо русских букв пришлет юникод
     except:
         return render_template('400.html'), 400
 

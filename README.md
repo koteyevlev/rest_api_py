@@ -51,4 +51,4 @@ Numpy - для реализации подсчета перцентилей;
   
   7) start_server.sh - скрипт запуска сервера через gunicorn, именно его запускает Виртуальная машина при перезагрузке
   
-  8) apache_test/ - содержит скрипты для проверок через apache benchmark. Можно запустить с помощью Makefile: 'make ap_get', 'make ap_stat', 'make ap_birth'.
+  8) apache_test/ - содержит скрипты для проверок через apache benchmark. Можно запустить с помощью Makefile: 'make ap_get', 'make ap_stat', 'make ap_birth'(логи будут в файле log.txt).
