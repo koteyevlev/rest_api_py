@@ -163,7 +163,7 @@ def post_data():
                               relatives=relatives, import_id=import_id)
             db.session.add(citizen)
         if last_valid(lst_cit, import_id):
-            return render_template('400.html'), 403 # do not forget to do it 400
+            return render_template('400.html'), 400
         db.session.commit()
         return jsonify({"data": {"import_id": citizen.import_id}}), 201
     except:
@@ -322,7 +322,7 @@ def edit_data(import_id, citizen_id):
         if datetime.datetime.now().date() < old_citizen.birth_date:
             return render_template('400.html'), 400
         if not cit['gender'] is None:
-            old_citizen.gender = cit['gender'] # check gender
+            old_citizen.gender = cit['gender']
         if not cit['relatives'] is None:
             try:
                 if not cit['relatives']:
@@ -337,6 +337,6 @@ def edit_data(import_id, citizen_id):
             old_citizen.relatives = new_data
         db.session.commit()
         printer = print_citizen(old_citizen)
-        return jsonify({"data": printer}) # порядок другой
+        return jsonify({"data": printer})
     except:
         return render_template('400.html'), 400
