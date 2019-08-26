@@ -4,7 +4,7 @@ Licensed to The Apache Software Foundation, http://www.apache.org/
 
 Benchmarking 0.0.0.0 (be patient)...INFO: GET header == 
 ---
-GET /imports/10/towns/stat/percentile/age HTTP/1.0
+GET /imports/10/citizens/birthdays HTTP/1.0
 Host: 0.0.0.0:8080
 User-Agent: ApacheBench/2.3
 Accept: */*
@@ -14,58 +14,480 @@ Accept: */*
 LOG: header received:
 HTTP/1.0 200 OK
 Server: gunicorn/19.9.0
-Date: Mon, 26 Aug 2019 17:22:50 GMT
+Date: Mon, 26 Aug 2019 18:19:03 GMT
 Connection: close
 Content-Type: application/json
-Content-Length: 962
+Content-Length: 688950
 
 {
-  "data": [
-    {
-      "p50": 41.35, 
-      "p75": 41.35, 
-      "p99": 41.35, 
-      "town": "somewhere"
-    }, 
-    {
-      "p50": 71.99, 
-      "p75": 81.85, 
-      "p99": 93.8, 
-      "town": "\u041a\u0430\u0437\u0430\u043d\u044c"
-    }, 
-    {
-      "p50": 102.56, 
-      "p75": 107.6, 
-      "p99": 112.44, 
-      "town": "\u0427\u0435\u0431\u043e\u043a\u0441\u0430\u0440\u044b"
-    }, 
-    {
-      "p50": 41.35, 
-      "p75": 65.86, 
-      "p99": 89.4, 
-      "town": "\u043d\u044c\u044e \u0439\u043e\u0440\u043a"
-    }, 
-    {
-      "p50": 57.02, 
-      "p75": 61.48, 
-      "p99": 65.77, 
-      "town": "\u041f\u0438\u0442\u0435\u0440"
-    }, 
-    {
-      "p50": 76.12, 
-      "p75": 76.12, 
-      "p99": 76.12, 
-      "town": "\u0412\u043b\u0430\u0434\u0438\u0432\u043e\u0441\u0442\u043e\u043a"
-    }, 
-    {
-      "p50": 25.17, 
-      "p75": 25.17, 
-      "p99": 25.17, 
-      "town": "\u041a\u0430\u043c\u0447\u0430\u0442\u043a\u0430"
-    }
-  ]
-}
-
+  "data": {
+    "1": [], 
+    "10": [], 
+    "11": [], 
+    "12": [], 
+    "2": [], 
+    "3": [], 
+    "4": [], 
+    "5": [
+      {
+        "citizen_id": 9998, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9999, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9996, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9997, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9994, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9995, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9992, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9993, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9990, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9991, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9988, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9989, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9986, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9987, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9984, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9985, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9982, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9983, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9980, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9981, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9978, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9979, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9976, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9977, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9974, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9975, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9972, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9973, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9970, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9971, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9968, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9969, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9966, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9967, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9964, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9965, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9962, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9963, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9960, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9961, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9958, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9959, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9956, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9957, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9954, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9955, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9952, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9953, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9950, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9951, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9948, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9949, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9946, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9947, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9944, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9945, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9942, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9943, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9940, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9941, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9938, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9939, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9936, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9937, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9934, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9935, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9932, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9933, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9930, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9931, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9928, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9929, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9926, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9927, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9924, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9925, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9922, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9923, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9920, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9921, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9918, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9919, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9916, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9917, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9914, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9915, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9912, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9913, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9910, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9911, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9908, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9909, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9906, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9907, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9904, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9905, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9902, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9903, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9900, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9901, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9898, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9899, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9896, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9897, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9894, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9895, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9892, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9893, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9890, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9891, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9888, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9889, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9886, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9887, 
+        "presents": 1
+      }, 
+      {
+        "citizen_id": 9884, 
+      
 ..done
 
 
@@ -73,23 +495,23 @@ Server Software:        gunicorn/19.9.0
 Server Hostname:        0.0.0.0
 Server Port:            8080
 
-Document Path:          /imports/10/towns/stat/percentile/age
-Document Length:        962 bytes
+Document Path:          /imports/10/citizens/birthdays
+Document Length:        688950 bytes
 
 Concurrency Level:      1
-Time taken for tests:   4.793 seconds
+Time taken for tests:   7.342 seconds
 Complete requests:      1
 Failed requests:        0
-Total transferred:      1115 bytes
-HTML transferred:       962 bytes
-Requests per second:    0.21 [#/sec] (mean)
-Time per request:       4792.725 [ms] (mean)
-Time per request:       4792.725 [ms] (mean, across all concurrent requests)
-Transfer rate:          0.23 [Kbytes/sec] received
+Total transferred:      689106 bytes
+HTML transferred:       688950 bytes
+Requests per second:    0.14 [#/sec] (mean)
+Time per request:       7341.657 [ms] (mean)
+Time per request:       7341.657 [ms] (mean, across all concurrent requests)
+Transfer rate:          91.66 [Kbytes/sec] received
 
 Connection Times (ms)
               min  mean[+/-sd] median   max
 Connect:        0    0   0.0      0       0
-Processing:  4793 4793   0.0   4793    4793
-Waiting:     4793 4793   0.0   4793    4793
-Total:       4793 4793   0.0   4793    4793
+Processing:  7342 7342   0.0   7342    7342
+Waiting:     7341 7341   0.0   7341    7341
+Total:       7342 7342   0.0   7342    7342
