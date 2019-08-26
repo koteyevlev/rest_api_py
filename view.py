@@ -214,7 +214,7 @@ def get_birthdays(import_id):
         data = Citizen.query.filter(Citizen.import_id == int(import_id))
     except:
         return "Invalid import id\n", 404
-    if not data:
+    if len(list(data)) == 0:
         return "Invalid import id\n", 404
     while month < 13:
         people = []
