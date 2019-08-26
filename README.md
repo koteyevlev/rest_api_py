@@ -13,7 +13,7 @@
   
   2) Выбрать базу данных - 'use rest_api1;'
   
-  3) Очистить таблицу - 'TRUNCATE TABLE citizen;'
+  3) Очистить таблицу - 'TRUNCATE TABLE citizen;' и 'TRUNCATE TABLE import_id;'
   
   4) Выйти из mysql('exit') и начать запускать тесты
 
