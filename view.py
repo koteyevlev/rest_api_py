@@ -89,7 +89,7 @@ def argv_valid(cit, relatives_check, unique_cit_id):
 До коммита все данные проверяются на уникальность citizen_id и на правильность родственных связей
 '''
 
-def last_valid(lst_cit, import_id):
+def last_valid(lst_cit, import_id, relat_dict):
     try:
         unique_cit_id = list()
         for cit in lst_cit:
@@ -103,16 +103,10 @@ def last_valid(lst_cit, import_id):
             if argv_valid(cit, relatives_check, unique_cit_id):
                  return 1
             unique_cit_id.append(cit['citizen_id'])
-            continue
             for one in relatives_check:
                 if one == int(cit['citizen_id']):
                     continue
-                for rel in lst_cit:
-                    if int(rel['citizen_id']) == one:
-                        old_citizen = rel
-                        break
-                #old_citizen = Citizen.query.filter(Citizen.import_id == import_id).filter(Citizen.citizen_id == one).first_or_404()
-                if int(cit['citizen_id']) not in list(old_citizen['relatives']):
+                if (cit['citizen_id']) not in relat_dict[one]:
                     return 1
     except:
         return 1
@@ -152,6 +146,7 @@ def post_data():
         return errors, 400
     try:
         db.create_all()
+        relat_dict = dict()
         for cit in lst_cit:
             editors = list(cit)
             for line in editors:
@@ -175,7 +170,8 @@ def post_data():
                               apartment=apartment, name=name, birth_date=birth_date, gender=gender,
                               relatives=relatives, import_id=import_id)
             db.session.add(citizen)
-        if last_valid(lst_cit, import_id):
+            relat_dict[citizen_id] = relatives
+        if last_valid(lst_cit, import_id, relat_dict):
             return "Invalid arguments\n", 400
         db.session.commit()
         return jsonify({"data": {"import_id": citizen.import_id}}), 201
