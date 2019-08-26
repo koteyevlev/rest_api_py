@@ -317,23 +317,23 @@ def edit_data(import_id, citizen_id):
                 return "Some keys is invalid\n", 400
         citizen_id, town, street, building, apartment, name, birth_date, gender, relatives, import_id = old_citizen.citizen_id, old_citizen.town, old_citizen.street, old_citizen.building, old_citizen.apartment, old_citizen.name, old_citizen.birth_date, old_citizen.gender, old_citizen.relatives, old_citizen.import_id
         cit = json_s
-        if not cit['town'] is None:
+        if 'town' in cit:
             old_citizen.town = cit['town']
-        if not cit['street'] is None:
+        if 'street' in cit:
             old_citizen.street = cit['street']
-        if not cit['building'] is None:
+        if 'building' in cit:
             old_citizen.building = cit['building']
-        if not cit['apartment'] is None:
+        if 'apartment' in cit:
             old_citizen.apartment = cit['apartment']
-        if not cit['name'] is None:
+        if 'name' in cit:
             old_citizen.name = cit['name']
-        if not cit['birth_date'] is None:
-            old_citizen.birth_date = datetime.datetime.strptime(cit['birth_date'], '%d.%m.%Y').date()
-        if datetime.datetime.now().date() < old_citizen.birth_date:
+        if 'birth_date' in cit:
+            old_citizen.birth_date = datetime.datetime.strptime(cit['birth_date'], '%d.%m.%Y')
+        if datetime.datetime.now().date() < old_citizen.birth_date.date():
             return "Data has future date\n", 400
-        if not cit['gender'] is None:
+        if 'gender' in cit:
             old_citizen.gender = cit['gender']
-        if not cit['relatives'] is None:
+        if 'relatives' in cit:
             try:
                 if not cit['relatives']:
                     new_data = []
