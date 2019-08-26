@@ -19,3 +19,6 @@ ap_birth:
 ap_post:
 	@sh apache_test/post_1000.sh > log.txt
 	@echo "Check log.txt if you want to see output"
+
+ap_big_post:
+	@ab -n 2 -c 1 -v 2 -p very_big_data.json -T 'application/json' http://0.0.0.0:8080/imports

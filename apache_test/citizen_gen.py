@@ -1,4 +1,10 @@
-## Этот файл создает json для 10000 горожан у которых парные связи
+'''
+Этот файл создает json из 10000 граждан, их можно поместить файл под названием very_big_data.json
+командой "python apache_test/citizen_gen.py > very_big_data.json"
+и очистить от одинарных кавычек - "vim very_big_data.json", "%s/'/"/g", ":wq"
+
+Запустить проверку можно командой "make ap_big_post"
+'''
 
 import copy
 
