@@ -1,0 +1,2 @@
+@reboot         entrant bash /home/entrant/rest_api_py/start_server.sh
+# если работать на другой ВМ то правило сверху нужно записать в /etc/crontab, при необходимости переписав путь до проекта
