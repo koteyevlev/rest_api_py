@@ -57,6 +57,7 @@ def argv_valid(cit, relatives_check, unique_cit_id):
             except:
                 pass
         else:
+            print("er town")
             return 1
     if len(cit['street']) > 256 or cit["street"] == "" or not re.search('[a-zA-Z0-9]', cit['street']):
         if not 0 > len(cit['street']) > 256:
@@ -92,15 +93,26 @@ def last_valid(lst_cit, import_id):
     try:
         unique_cit_id = list()
         for cit in lst_cit:
-            relatives_check = list(map(int, str(cit['relatives'])[1:-1].split(',')))
-            if argv_valid(cit, relatives_check, unique_cit_id):
-                return 1
-            unique_cit_id.append(cit['citizen_id'])
-            if not relatives_check:
+            try:
+               relatives_check = list(map(int, str(cit['relatives'])[1:-1].split(',')))
+            except:         
+                if argv_valid(cit, [], unique_cit_id):
+                    return 1
+                unique_cit_id.append(cit['citizen_id'])
                 continue
+            if argv_valid(cit, relatives_check, unique_cit_id):
+                 return 1
+            unique_cit_id.append(cit['citizen_id'])
+            continue
             for one in relatives_check:
-                old_citizen = Citizen.query.filter(Citizen.import_id == import_id).filter(Citizen.citizen_id == one).first_or_404()
-                if int(cit['citizen_id']) not in list(old_citizen.relatives):
+                if one == int(cit['citizen_id']):
+                    continue
+                for rel in lst_cit:
+                    if int(rel['citizen_id']) == one:
+                        old_citizen = rel
+                        break
+                #old_citizen = Citizen.query.filter(Citizen.import_id == import_id).filter(Citizen.citizen_id == one).first_or_404()
+                if int(cit['citizen_id']) not in list(old_citizen['relatives']):
                     return 1
     except:
         return 1
