@@ -32,4 +32,6 @@ class Citizen(db.Model):
         citizen["relatives"]= self.relatives
         return str(citizen)
 
+class Import_id(db.Model):
+    last_id = db.Column(db.Integer, unique=True, primary_key=True)
 

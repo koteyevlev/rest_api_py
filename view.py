@@ -4,7 +4,7 @@ import json
 import flask
 import re
 import datetime
-from models import Citizen
+from models import Citizen, Import_id
 from app import db
 import numpy as np
 
@@ -143,9 +143,11 @@ def post_data():
     json_s, errors = first_validate()
     lst_cit = json_s['citizens']
     try:
-        import_id = (Citizen.query.all()[-1]).import_id + 1
+        import_id = Import_id.query.all()[-1].last_id + 1
     except:
         import_id = 1
+    last_id = Import_id(last_id=import_id)
+    db.session.add(last_id)
     if errors:
         return errors, 400
     try:
