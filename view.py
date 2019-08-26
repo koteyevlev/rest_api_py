@@ -12,7 +12,6 @@ import numpy as np
 Первичная валидация проверяет был ли передан json и есть ли в нем нужныe ключи
 '''
 
-
 def first_validate():
     errors = []
     json_s = flask.request.get_json()
